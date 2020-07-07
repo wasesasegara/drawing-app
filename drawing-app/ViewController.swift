@@ -10,31 +10,38 @@ import UIKit
 
 class Canvas: UIView {
     
-    var line = [CGPoint]()
+    var lines = [[CGPoint]]()
     
     override func draw(_ rect: CGRect) {
-        // Custom drawing
         super.draw(rect)
         
         guard let context = UIGraphicsGetCurrentContext() else { return }
         
-        // Test first line
-//        let start: CGPoint = .zero
-//        let end = CGPoint(x: 100, y: 100)
-//        context.move(to: start)
-//        context.addLine(to: end)
-        
-        for (index, point) in line.enumerated() {
-            if index == 0 { context.move(to: point) }
-            else { context.addLine(to: point) }
+        // Read all lines and start drawing
+        lines.forEach { (line) in
+            for (index, point) in line.enumerated() {
+                if index == 0 { context.move(to: point) }
+                else { context.addLine(to: point) }
+            }
         }
         
         context.strokePath()
     }
     
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        // Create new line
+        lines.append([CGPoint]())
+    }
+    
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first?.location(in: self) else { return }
+        
+        // Pop out last line and modify it then append it again to lines
+        guard var line = lines.popLast() else { return }
         line.append(touch)
+        lines.append(line)
+        
+        // Update display of lines
         setNeedsDisplay()
     }
     
